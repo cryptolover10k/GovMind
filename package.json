@@ -1,0 +1,41 @@
+{
+  "name": "govmind",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"vite\" \"node server.js\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "create-wallet": "node scripts/create_wallet.js",
+    "register-secret": "node scripts/register_secret.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "@circle-fin/developer-controlled-wallets": "^10.8.0",
+    "@circle-fin/user-controlled-wallets": "^10.8.0",
+    "@circle-fin/w3s-pw-web-sdk": "^1.1.11",
+    "concurrently": "^10.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "ethers": "^6.17.0",
+    "express": "^5.2.1",
+    "framer-motion": "^11.0.0",
+    "genlayer-js": "^1.1.8",
+    "lucide-react": "^0.400.0",
+    "openai": "^6.46.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sharp": "^0.35.3",
+    "solc": "^0.8.20"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.14",
+    "tailwindcss": "^4.3.0",
+    "vite": "^8.0.12",
+    "vite-plugin-node-polyfills": "^0.28.0"
+  }
+}

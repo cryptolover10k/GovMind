@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="GovMind DAO Shield">
+  <defs>
+    <linearGradient id="shield" x1="12" x2="52" y1="8" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="0.52" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#22c55e"/>
+    </linearGradient>
+    <linearGradient id="core" x1="21" x2="43" y1="18" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ecfeff"/>
+      <stop offset="1" stop-color="#86efac"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#030712"/>
+  <path
+    fill="url(#shield)"
+    d="M32 7 52 15v15c0 13.4-8.2 22.3-20 27-11.8-4.7-20-13.6-20-27V15l20-8Z"
+  />
+  <path
+    fill="#07111f"
+    d="M32 12.8 46.8 19v11.3c0 9.5-5.7 16.4-14.8 20.4-9.1-4-14.8-10.9-14.8-20.4V19L32 12.8Z"
+  />
+  <path
+    fill="url(#core)"
+    d="M32 18.5a13.5 13.5 0 0 0-13.2 16.3h5.8A7.8 7.8 0 1 1 32 39.8h-3.2v-6.2h-9.4V45h12.7A13.3 13.3 0 0 0 32 18.5Z"
+  />
+  <circle cx="32" cy="32" r="3.8" fill="#22d3ee"/>
+</svg>

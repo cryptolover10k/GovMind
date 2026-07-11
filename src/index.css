@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #030712;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+select option {
+  background: #12091f;
+  color: #f8fafc;
+}
+
+.console-grid {
+  background:
+    linear-gradient(rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.06) 1px, transparent 1px),
+    linear-gradient(135deg, #040712 0%, #07111f 48%, #090517 100%);
+  background-size: 48px 48px, 48px 48px, auto;
+}
+
+.ai-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(94, 234, 212, 0.18);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.88), rgba(3, 7, 18, 0.9)),
+    linear-gradient(135deg, rgba(34, 211, 238, 0.08), rgba(168, 85, 247, 0.08));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(18px);
+}
+
+.ai-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.8), rgba(168, 85, 247, 0.7), transparent);
+}
+
+.ai-card {
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.ai-kicker {
+  color: #67e8f9;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.ai-primary-button {
+  border: 1px solid rgba(103, 232, 249, 0.32);
+  background: linear-gradient(90deg, #22d3ee, #8b5cf6, #22c55e);
+  color: white;
+  box-shadow: 0 0 28px rgba(34, 211, 238, 0.22);
+}
+
+.ai-secondary-button {
+  border: 1px solid rgba(103, 232, 249, 0.28);
+  background: rgba(8, 47, 73, 0.35);
+  color: #cffafe;
+}
+
+.shield-active {
+  animation: shieldBreath 3.2s ease-in-out infinite;
+}
+
+.shield-active::before,
+.shield-active::after {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border: 1px solid rgba(34, 211, 238, 0.26);
+  border-radius: 2.35rem;
+  opacity: 0;
+  animation: shieldPing 2.6s ease-out infinite;
+}
+
+.shield-active::after {
+  animation-delay: 1.3s;
+  border-color: rgba(34, 197, 94, 0.24);
+}
+
+.shield-ring {
+  animation: shieldRingBlink 1.8s ease-in-out infinite;
+}
+
+.shield-logo {
+  animation: shieldLogoPulse 2.4s ease-in-out infinite;
+}
+
+.shield-status-dot {
+  animation: shieldDotBlink 1.1s ease-in-out infinite;
+}
+
+@keyframes shieldBreath {
+  0%,
+  100% {
+    box-shadow: 0 0 42px rgba(34, 211, 238, 0.14);
+  }
+
+  50% {
+    box-shadow: 0 0 76px rgba(34, 211, 238, 0.3), 0 0 34px rgba(34, 197, 94, 0.16);
+  }
+}
+
+@keyframes shieldPing {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  35% {
+    opacity: 0.75;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes shieldRingBlink {
+  0%,
+  100% {
+    border-color: rgba(110, 231, 183, 0.1);
+  }
+
+  50% {
+    border-color: rgba(110, 231, 183, 0.42);
+  }
+}
+
+@keyframes shieldLogoPulse {
+  0%,
+  100% {
+    opacity: 0.92;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.035);
+  }
+}
+
+@keyframes shieldDotBlink {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shield-active,
+  .shield-active::before,
+  .shield-active::after,
+  .shield-ring,
+  .shield-logo,
+  .shield-status-dot {
+    animation: none;
+  }
+}
+
+/* Modal Micro-animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn95 {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInFromTop {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in.fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-in.zoom-in-95 {
+  animation: zoomIn95 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-in.slide-in-from-top-2 {
+  animation: slideInFromTop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

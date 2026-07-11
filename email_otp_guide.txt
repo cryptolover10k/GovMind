@@ -1,0 +1,881 @@
+may also fund using faucets or airdrops without requiring wallet access.</span></div></div></div><div id="panel-email-otp-1" role="tabpanel" aria-labelledby="email-otp" class="prose dark:prose-invert overflow-x-auto [&amp;_[data-table-wrapper]]:![--page-padding:0px] [&amp;_[role=&quot;listitem&quot;
+sent to their email and creates a user-owned wallet for each authenticated user.
+The app displays the wallet address and the USDC balance it holds.</span><h2 class="flex whitespace-pre-wrap group font-semibold" id="prerequisites-2"><div class="absolute" tabindex="-1"><a href="#prerequisites-2" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-100 focus:opaci
+<li>Created a <a href="https://mailtrap.io/" target="_blank" rel="noreferrer" class="link">Mailtrap</a> account with <strong>Email Sandbox</strong>
+enabled.</li>
+<li>Created a <a href="https://console.circle.com/" target="_blank" rel="noreferrer" class="link">Circle Developer Console</a> account.</li>
+<li>Created a Circle Developer API key:<br/>
+<strong>Console → Keys → Create a key → API key → Standard Key</strong>.</li>
+<li>Installed <a href="https://nodejs.org/" target="_blank" rel="noreferrer" class="link">Node.js 22+</a>.</li>
+</ul><h2 class="flex whitespace-pre-wrap group font-semibold" id="step-1-get-mailtrap-smtp-credentials"><div class="absolute" tabindex="-1"><a href="#step-1-get-mailtrap-smtp-credentials" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-100 focus:opacity-100 focus:outline-0 gro
+<li>
+<span data-as="p">Log in to your <a href="https://mailtrap.io/" target="_blank" rel="noreferrer" class="link">Mailtrap</a> account.</span>
+</li>
+<li>
+<span data-as="p">In the left navigation, click <strong>Transactional → Sandboxes</strong>.</span>
+</li>
+<li>
+<span data-as="p">Open the default sandbox project (<strong>My Sandbox</strong>) or create a new one.</span>
+</li>
+<li>
+<span data-as="p">In the sandbox view, select the <strong>SMTP Settings</strong> tab.</span>
+</li>
+<li>
+<span data-as="p">Copy the following SMTP values:</span>
+<ul>
+<li><strong>Host</strong></li>
+<li><strong>Port</strong></li>
+<li><strong>Username</strong></li>
+<li><strong>Password</strong></li>
+</ul>
+<span data-as="p">You need them for the next step.</span>
+</li>
+</ol><h2 class="flex whitespace-pre-wrap group font-semibold" id="step-2-configure-the-circle-console-2"><div class="absolute" tabindex="-1"><a href="#step-2-configure-the-circle-console-2" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-100 focus:opacity-100 focus:outline-0 g
+emails, and copy the App ID that identifies your user-controlled wallets
+configuration.</span><ol>
+<li>Log in to the <a href="https://console.circle.com/" target="_blank" rel="noreferrer" class="link">Circle Developer Console</a>.</li>
+<li>Navigate to <strong>Wallets → User Controlled → Configurator</strong>.</li>
+<li>Under <strong>Authentication Methods</strong>, click <strong>Email</strong>.</li>
+<li>Enter a <strong>From</strong> email address (for example, <code>no-reply@example.com</code>).</li>
+<li>Enter the SMTP values you copied from Mailtrap:<!-- -->
+<ul>
+<li><strong>Host</strong></li>
+<li><strong>Port</strong></li>
+<li><strong>Username</strong></li>
+<li><strong>Password</strong></li>
+</ul>
+</li>
+<li>(Optional) Customize your OTP email from, subject, and message body.</li>
+<li>Go to the <strong>Configurator</strong> page and copy your <strong>App ID</strong>. You need it for the
+next step.</li>
+</ol><h2 class="flex whitespace-pre-wrap group font-semibold" id="step-3-create-the-web-application-2"><div class="absolute" tabindex="-1"><a href="#step-3-create-the-web-application-2" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-100 focus:opacity-100 focus:outline-0 group
+creates a wallet for each authenticated user.</span><h3 class="flex whitespace-pre-wrap group font-semibold" id="3-1-create-the-next-js-project-2"><div class="absolute" tabindex="-1"><a href="#3-1-create-the-next-js-project-2" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-10
+<span class="line"><span style="color:#0550AE;--shiki-dark:#DCDCAA">cd</span><span style="color:#0A3069;--shiki-dark:#CE9178"> circle-email-otp</span></span>
+</code></pre></div></div><div class="print:hidden" data-fade-overlay="true" aria-hidden="true" style="--fade-color-light:#ffffff;--fade-color-dark:#0B0C0E"></div></div><h3 class="flex whitespace-pre-wrap group font-semibold" id="3-2-install-dependencies-2"><div class="absolute" tabindex="-1"><a href
+</code></pre></div></div><div class="print:hidden" data-fade-overlay="true" aria-hidden="true" style="--fade-color-light:#ffffff;--fade-color-dark:#0B0C0E"></div></div><h3 class="flex whitespace-pre-wrap group font-semibold" id="3-3-add-environment-variables-2"><div class="absolute" tabindex="-1"><a
+</code></pre></div></div><div class="print:hidden" data-fade-overlay="true" aria-hidden="true" style="--fade-color-light:#ffffff;--fade-color-dark:#0B0C0E"></div></div><span data-as="p">Open the <code>.env.local</code> file and add the following:</span><div class="code-block mt-5 mb-8 not-prose roun
+<span class="line"><span>NEXT_PUBLIC_CIRCLE_APP_ID=&lt;YOUR_CIRCLE_APP_ID&gt;</span></span>
+<span class="line"><span></span></span></code></pre></div></div><div class="print:hidden" data-fade-overlay="true" aria-hidden="true" style="--fade-color-light:#ffffff;--fade-color-dark:#0B0C0E"></div></div><ul>
+<li><code>YOUR_CIRCLE_API_KEY</code> is your Circle Developer API key.</li>
+<li><code>YOUR_CIRCLE_APP_ID</code> is the Circle Wallet App ID obtained in Step 2.</li>
+</ul><h3 class="flex whitespace-pre-wrap group font-semibold" id="3-4-simplify-the-default-layout-2"><div class="absolute" tabindex="-1"><a href="#3-4-simplify-the-default-layout-2" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-100 focus:opacity-100 focus:outline-0 group/lin
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">  children</span><span style="color:#953800;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#D4D4D4">}</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#953800;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">  children</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#953800;--shiki-dark:#4EC9B0"> React</span><span style="color:#953800;--shiki-dark:#D4D4D4">.</span><span style="color:#953800;--shiki-dark
+<span class="line"><span style="color:#953800;--shiki-dark:#D4D4D4">}) </span><span style="color:#1F2328;--shiki-dark:#D4D4D4">{</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">  return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">    &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">html</span><span style="color:#0550AE;--shiki-dark:#9CDCFE"> lang</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#0A3069;--shiki-dark
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">      &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">body</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dar
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">    &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">html</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">}</span></span>
+</code></pre></div></div><div data-component-part="code-block-footer" class="px-3 py-1 flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><button data-component-part="code-block-footer-button" class="flex-1 gap-1.5 flex items-center p
+<code>create-next-app</code> includes fonts and styling that can cause build errors in
+some environments.</span></div></div><h3 class="flex whitespace-pre-wrap group font-semibold" id="3-5-add-unified-backend-route-2"><div class="absolute" tabindex="-1"><a href="#3-5-add-unified-backend-route-2" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-100 focus:opacity-1
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> CIRCLE_BASE_URL</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">  process</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">env</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#0550AE;--shiki-dark:#4F
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> CIRCLE_API_KEY</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> process</span><span style="color:#1F2328;
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">export</span><span style="color:#CF222E;--shiki-dark:#569CD6"> async</span><span style="color:#CF222E;--shiki-dark:#569CD6"> function</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> POST</span><span style="color:#1F2328;--sh
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">  try</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">    const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> body</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">    const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0550AE;--shiki-dark:#4FC1FF">action</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#CF222E;--shiki-da
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">action</span><span style="color:#1F2328;--shiki-dark:#D
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2328;
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    switch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">action</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">) {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      case</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;requestEmailOtp&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">: {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0550AE;--shiki-dark:#4FC1FF">deviceId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--sh
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">deviceId</span><span style="color:#CF222E;--shiki-d
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;Missing deviceId or email&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</s
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">status:</span><span style="color:#0550AE;--shiki-dark:#B5CEA8"> 400</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> response</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#8250DF;
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">          `</span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">CIRCLE_BASE_URL</span><span style="color:#0A3069;--shiki-dark:#569CD6">}</span><span style="color:#0A3069;-
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            method:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;POST&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            headers:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">              &quot;Content-Type&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;application/json&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              Authorization:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> `Bearer </span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">CIRCLE_API_KEY</span><spa
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            body:</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> JSON</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">stringify</span><span style="color:#1F232
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              idempotencyKey:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> crypto</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">randomUUID</span><span styl
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              deviceId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              email</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            }),</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        );</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> data</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--sh
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">response</span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">        // { deviceToken, deviceEncryptionKey, otpToken }</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F232
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      case</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;initializeUser&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">: {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0550AE;--shiki-dark:#4FC1FF">userToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> } </span><span style="color:#CF222E;--
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">userToken</span><span style="color:#1F2328;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;Missing userToken&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></sp
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">status:</span><span style="color:#0550AE;--shiki-dark:#B5CEA8"> 400</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> response</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#8250DF;
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">          `</span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">CIRCLE_BASE_URL</span><span style="color:#0A3069;--shiki-dark:#569CD6">}</span><span style="color:#0A3069;-
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            method:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;POST&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            headers:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">              &quot;Content-Type&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;application/json&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              Authorization:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> `Bearer </span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">CIRCLE_API_KEY</span><spa
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">              &quot;X-User-Token&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> userToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            body:</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> JSON</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">stringify</span><span style="color:#1F232
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              idempotencyKey:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> crypto</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">randomUUID</span><span styl
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              accountType:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;SCA&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              blockchains:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;ARC-TESTNET&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">],</span></sp
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            }),</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        );</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> data</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--sh
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">response</span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">          // e.g. 155106 user already initialized</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">        // { challengeId }</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F232
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      case</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;listWallets&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">: {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0550AE;--shiki-dark:#4FC1FF">userToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> } </span><span style="color:#CF222E;--
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">userToken</span><span style="color:#1F2328;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;Missing userToken&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></sp
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">status:</span><span style="color:#0550AE;--shiki-dark:#B5CEA8"> 400</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> response</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#8250DF;
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          method:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;GET&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          headers:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            accept:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;application/json&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">            &quot;content-type&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;application/json&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            Authorization:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> `Bearer </span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">CIRCLE_API_KEY</span><span 
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">            &quot;X-User-Token&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> userToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> data</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--sh
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">response</span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">        // { wallets: [...] }</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F232
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      case</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;getTokenBalance&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">: {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0550AE;--shiki-dark:#4FC1FF">userToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--s
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">userToken</span><span style="color:#CF222E;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;Missing userToken or walletId&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> }
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">status:</span><span style="color:#0550AE;--shiki-dark:#B5CEA8"> 400</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> response</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#8250DF;
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">          `</span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">CIRCLE_BASE_URL</span><span style="color:#0A3069;--shiki-dark:#569CD6">}</span><span style="color:#0A3069;-
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            method:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;GET&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            headers:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              accept:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;application/json&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              Authorization:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> `Bearer </span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">CIRCLE_API_KEY</span><spa
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">              &quot;X-User-Token&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> userToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        );</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> data</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--sh
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">response</span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">        // { tokenBalances: [...] }</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F232
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      default</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">:</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F232
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> `Unknown action: </span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">status:</span><span style="color:#0550AE;--shiki-dark:#B5CEA8"> 400</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  } </span><span style="color:#CF222E;--shiki-dark:#C586C0">catch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error</span><span style="color:#1F2328;--shiki-dark:#
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">    console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">error</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> NextResponse</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">json</span><span style="color:#1F2328;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;Internal server error&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">status:</span><span style="color:#0550AE;--shiki-dark:#B5CEA8"> 500</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">}</span></span>
+</code></pre></div></div><div data-component-part="code-block-footer" class="px-3 py-1 flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><button data-component-part="code-block-footer-button" class="flex-1 gap-1.5 flex items-center p
+used by the app, mapping frontend actions to thin wrapper handlers that call the
+corresponding endpoints:</span><div data-table-wrapper="true" tabindex="0" role="region" aria-label="Scrollable table" class="[--page-padding:20px] overflow-x-auto flex w-[calc(100%+(var(--page-padding)*2))] my-[1em] py-[1em] -mx-(--page-padding) max-w-none [contain:inline-size]"><div class="px-(--p
+simplicity. In production, apps typically store wallet and balance data in a
+backend database and keep it in sync using Circle webhooks for scalability.</span></div></div><span data-as="p">To understand how the request fields and response data for these handlers and
+their corresponding endpoints are used, follow the app flow in
+<a href="#step-4-run-the-app-flow-2" class="link">Step 4</a> below.</span><h3 class="flex whitespace-pre-wrap group font-semibold" id="​3-6-add-ui-and-frontend-code-2"><div class="absolute" tabindex="-1"><a href="#​3-6-add-ui-and-frontend-code-2" class="-ml-10 flex items-center opacity-0 border-0 gr
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">import</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">useEffect</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#1F2328;--shiki-da
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">import</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">W3SSdk</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> } </span><span style="color:#CF222E;--shiki-dark
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> appId</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> process</span><span style="color:#1F2328;--shiki-d
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">type</span><span style="color:#953800;--shiki-dark:#4EC9B0"> LoginResult</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">  userToken</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> string</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">  encryptionKey</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> string</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">};</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">type</span><span style="color:#953800;--shiki-dark:#4EC9B0"> Wallet</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">  id</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> string</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">  address</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> string</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">  blockchain</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> string</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  [</span><span style="color:#953800;--shiki-dark:#9CDCFE">key</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> string</span><span style="color:#1F2328;--shiki-dark:#D4
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">};</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">export</span><span style="color:#CF222E;--shiki-dark:#C586C0"> default</span><span style="color:#CF222E;--shiki-dark:#569CD6"> function</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> HomePage</span><span style="color:#95380
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> sdkRef</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> useRef</span><span style="color:#1F2328;--shiki
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">sdkReady</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-dar
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">deviceId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-dar
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">deviceIdLoading</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--sh
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">email</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-dark:#
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">deviceToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">deviceEncryptionKey</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">otpToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-dar
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">loginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">challengeId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">wallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-dark
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">usdcBalance</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">status</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-dark:
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> [</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">isError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">, </span><span style="color:#0550AE;--shiki-dark
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">  // Initialize SDK on mount</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">  useEffect</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(() </span><span style="color:#CF222E;--shiki-dark:#569CD6">=&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">    let</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> cancelled</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#0550AE;--shiki-dark:#569CD6"> false</span><span style="color:#1F2328;--shi
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">    const</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> initSdk</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#569CD6"> async</span><span style="color:#1F2328;--shi
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      try</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> onLoginComplete</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#9538
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">cancelled</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">) </span><span style="color:#CF222E;--shi
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> ||</span><span style="color:#CF222E;--shiki-
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">            // Always treat this as a soft failure</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">            const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> err</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shi
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">            const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> message</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> string</span><span style="color:#CF22
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              err</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">?.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">message</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> ||</span><span style="color:#0A3069;-
+<span class="line"></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shik
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              code:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> err</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">?.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">code</span><span style="color:#1F2328;-
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              message</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">            setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">            setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">message</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">            setLoginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">            return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">          // Success: we get userToken + encryptionKey for challenges</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setLoginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">({</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            userToken:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> result</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">userToken</span><span style="color
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            encryptionKey:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> result</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">encryptionKey</span><span styl
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          });</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">          // Keep this neutral so later wallet-status messages aren&#x27;t confusing</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Email verified. Click Initialize user to continue&quot;</span><span style="color:#1F2328;--shi
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> sdk</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#569CD6"> new</span><span style="color:#8250DF;--shiki
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            appSettings:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">appId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          onLoginComplete</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        );</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        sdkRef</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">current</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shik
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">cancelled</span><span style="color:#1F2328;--shiki-
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setSdkReady</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;SDK initialized. Ready to request OTP.&quot;</span><span style="color:#1F2328;--shiki-dark:#D4
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      } </span><span style="color:#CF222E;--shiki-dark:#C586C0">catch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">err</span><span style="color:#1F2328;--shiki-dark
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-da
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">cancelled</span><span style="color:#1F2328;--shiki-
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to initialize Web SDK&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">    void</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> initSdk</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">();</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> () </span><span style="color:#CF222E;--shiki-dark:#569CD6">=&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">      cancelled</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#0550AE;--shiki-dark:#569CD6"> true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    };</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  }, []);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">  // Get / cache deviceId</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">  useEffect</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(() </span><span style="color:#CF222E;--shiki-dark:#569CD6">=&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">    const</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> fetchDeviceId</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#569CD6"> async</span><span style="color:#1F2328
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">sdkRef</span><span style="color:#1F2328;--shiki-dark:
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      try</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> cached</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">          typeof</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> window</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> !==</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;undefined&quot;</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">            ?</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> window</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">localStorage</span><span style="color:#1F23
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">            :</span><span style="color:#0550AE;--shiki-dark:#569CD6"> null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">cached</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">) {</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setDeviceId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">cached</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setDeviceIdLoading</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> id</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--shik
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setDeviceId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">id</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#569CD6">typeof</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> window</span><span style="color:#CF222E;--shi
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          window</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">localStorage</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      } </span><span style="color:#CF222E;--shiki-dark:#C586C0">catch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error</span><span style="color:#1F2328;--shiki-da
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to get deviceId&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></s
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      } </span><span style="color:#CF222E;--shiki-dark:#C586C0">finally</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setDeviceIdLoading</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">sdkReady</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">) {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      void</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> fetchDeviceId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">();</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  }, [</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">sdkReady</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">]);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">  // Load USDC balance</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  async</span><span style="color:#CF222E;--shiki-dark:#569CD6"> function</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> loadUsdcBalance</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#9538
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    try</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> response</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#8250DF;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        method:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;POST&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        headers:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Content-Type&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        body:</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> JSON</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">stringify</span><span style="color:#1F2328;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          action:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;getTokenBalance&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          userToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          walletId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }),</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> data</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--shik
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">response</span><span style="color:#1F2328;--shiki-dar
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to load USDC balance&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</spa
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#0550AE;--shiki-dark:#569CD6"> null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> balances</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shik
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> usdcEntry</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        balances</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">find</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">((</span><span style="color:#953800;--shiki
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">          const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> symbol</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> t</span><span style="color:#1F2328;--sh
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">          const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> name</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> t</span><span style="color:#1F2328;--shik
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> symbol</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">startsWith</span><span style="color:#1F2
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }) </span><span style="color:#CF222E;--shiki-dark:#D4D4D4">??</span><span style="color:#0550AE;--shiki-dark:#569CD6"> null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> amount</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> usdcEntry</span><span style="color:#1F2328;
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setUsdcBalance</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">amount</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">      // Note: loadWallets may overwrite this with a more specific status</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Wallet details and USDC balance loaded.&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> amount</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    } </span><span style="color:#CF222E;--shiki-dark:#C586C0">catch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">err</span><span style="color:#1F2328;--shiki-dark:#
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">      console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to load USDC balance&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#0550AE;--shiki-dark:#569CD6"> null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">  // Load wallets for current user</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> loadWallets</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#569CD6"> async</span><span style="color:#1F2328;--s
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">    userToken</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">:</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> string</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#953800;--shiki-dark:#9CDCFE">    options</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">?:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#953800;--shiki-dark:#9CDCFE">source</span><span style="color:#CF222E;--shiki-
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  ) </span><span style="color:#CF222E;--shiki-dark:#569CD6">=&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    try</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Loading wallet details...&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setUsdcBalance</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> response</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#8250DF;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        method:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;POST&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        headers:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Content-Type&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        body:</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> JSON</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">stringify</span><span style="color:#1F2328;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          action:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;listWallets&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          userToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }),</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> data</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--shik
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">response</span><span style="color:#1F2328;--shiki-dar
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to load wallet details&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</s
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> wallets</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setWallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">wallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">wallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#0550AE;--shiki-dark
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        await</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> loadUsdcBalance</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">userToken</span><span style="color
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">options</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">?.</span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span></span>
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">            &quot;Wallet created successfully! 🎉 Wallet details and USDC balance loaded.&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        } </span><span style="color:#CF222E;--shiki-dark:#C586C0">else</span><span style="color:#CF222E;--shiki-dark:#C586C0"> if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dar
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span></span>
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">            &quot;User already initialized. Wallet details and USDC balance loaded.&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      } </span><span style="color:#CF222E;--shiki-dark:#C586C0">else</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span></span>
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">          &quot;Wallet creation in progress. Click Initialize user again to refresh.&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    } </span><span style="color:#CF222E;--shiki-dark:#C586C0">catch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">err</span><span style="color:#1F2328;--shiki-dark:#
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">      console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to load wallet details&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</spa
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> handleRequestOtp</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#569CD6"> async</span><span style="color:#1F232
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">email</span><span style="color:#1F2328;--shiki-dark:#D4
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Please enter an email address.&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</sp
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">deviceId</span><span style="color:#1F2328;--shiki-dark:
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Missing deviceId. Try again.&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">    // Reset auth + wallet state</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">    setLoginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">    setChallengeId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">    setWallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">([]);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">    setUsdcBalance</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    try</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Requesting OTP...&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> response</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#8250DF;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        method:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;POST&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        headers:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Content-Type&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        body:</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> JSON</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">stringify</span><span style="color:#1F2328;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          action:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;requestEmailOtp&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          deviceId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          email</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }),</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> data</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--shik
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">response</span><span style="color:#1F2328;--shiki-dar
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setDeviceToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--sh
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setDeviceEncryptionKey</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setOtpToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">      // Give the SDK the session info so verifyOtp() works</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> sdk</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> sdkRef</span><span style="color:#1F2328;--shik
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">sdk</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">) {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        sdk</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">updateConfigs</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">({</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          appSettings:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">appId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          loginConfigs:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            deviceToken:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">deviceToken</span><span style="col
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            deviceEncryptionKey:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">deviceEncryptionKey</span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            otpToken:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">otpToken</span><span style="color:#1F
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            email:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#1F2328;--shiki-dark:#9CDCFE">email</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          },</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        });</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span></span>
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">        &quot;OTP sent! Check your Mailtrap sandbox inbox, then click Verify email OTP.&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    } </span><span style="color:#CF222E;--shiki-dark:#C586C0">catch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">err</span><span style="color:#1F2328;--shiki-dark:#
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">      console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to request OTP&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> handleVerifyOtp</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> () </span><span style="color:#CF222E;-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">    const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> sdk</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> sdkRef</span><span style="color:#1F2328;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">sdk</span><span style="color:#1F2328;--shiki-dark:#D4D4
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;SDK not ready&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">deviceToken</span><span style="color:#CF222E;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Missing OTP session data. Request a new code.&quot;</span><span style="color:#1F2328;--shiki-dark:
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">    setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">    setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Opening OTP verification window...&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</
+<span class="line"></span>
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">    // Opens Circle&#x27;s hosted OTP UI; on completion, onLoginComplete fires</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">    sdk</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">verifyOtp</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">();</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> handleInitializeUser</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#569CD6"> async</span><span style="color:#1
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">loginResult</span><span style="color:#1F2328;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Missing userToken. Please verify your email first.&quot;</span><span style="color:#1F2328;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    try</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> {</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Initializing user...&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> response</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#8250DF;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        method:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;POST&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        headers:</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> { </span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Content-Type&quot;</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">:</span><span style="
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        body:</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> JSON</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">stringify</span><span style="color:#1F2328;--
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          action:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;initializeUser&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          userToken:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> loginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">userToken</span><span style="co
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }),</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> data</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#CF222E;--shiki-dark:#C586C0"> await</span><span style="color:#1F2328;--shik
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">response</span><span style="color:#1F2328;--shiki-dar
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          await</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> loadWallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">loginResult</span><span style="color
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            source:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;alreadyInitialized&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          });</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">          setChallengeId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">          return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> errorMsg</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> data</span><span style="color:#1F2328;-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">          ?</span><span style="color:#0A3069;--shiki-dark:#CE9178"> `[</span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">data</span><span style="color:#0A3069;--shiki-da
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">          :</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error</span><span style="color:#CF222E;--shiki-
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to initialize user: &quot;</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> +</spa
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setChallengeId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">data</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--sh
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">`User initialized. Click Create wallet to continue.`</span><span style="color:#1F2328;--shiki-dark:#D4D4
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    } </span><span style="color:#CF222E;--shiki-dark:#C586C0">catch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#953800;--shiki-dark:#9CDCFE">err</span><span style="color:#CF222E;--shiki-dark:#
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">err</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">?.</span><span style="color:#1F2328;--shiki-dark:#9
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        await</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> loadWallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">loginResult</span><span style="color:#
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">          source:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;alreadyInitialized&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        });</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setChallengeId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> errorMsg</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> err</span><span style="color:#1F2328;--sh
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">        ?</span><span style="color:#0A3069;--shiki-dark:#CE9178"> `[</span><span style="color:#0A3069;--shiki-dark:#569CD6">${</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">err</span><span style="color:#0A3069;--shiki-dark:
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">        :</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> err</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">?.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">message</span><span style="color:#CF222E;--shiki-
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Failed to initialize user: &quot;</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> +</span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> handleExecuteChallenge</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> () </span><span style="color:#C
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">    const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> sdk</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> sdkRef</span><span style="color:#1F2328;--shiki-
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">sdk</span><span style="color:#1F2328;--shiki-dark:#D4D4
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;SDK not ready&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">challengeId</span><span style="color:#1F2328;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Missing challengeId. Initialize user first.&quot;</span><span style="color:#1F2328;--shiki-dark:#D
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">    if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">loginResult</span><span style="color:#1F2328;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Missing login credentials. Please verify your email again.&quot;</span><span style="color:#1F2328;
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">    sdk</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">setAuthentication</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">({</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">      userToken:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> loginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">userToken</span><span style="color:
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">      encryptionKey:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> loginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">encryptionKey</span><span style
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    });</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">    setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">    setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Executing challenge...&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">    sdk</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">execute</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> err</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dar
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">      if</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">error</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">) {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span></span>
+<span class="line"><span style="color:#0A3069;--shiki-dark:#CE9178">          &quot;Failed to execute challenge: &quot;</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> +</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">err</span
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        );</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">false</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">      setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Challenge executed. Loading wallet details...&quot;</span><span style="color:#1F2328;--shiki-dark:
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">      void</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span><span style="color:#CF222E;--shiki-dark:#569CD6">async</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> () </span><span style="color:#CF222E;--shiki-d
+<span class="line"><span style="color:#6E7781;--shiki-dark:#6A9955">        // small delay to give Circle time to index the wallet</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        await</span><span style="color:#CF222E;--shiki-dark:#569CD6"> new</span><span style="color:#0550AE;--shiki-dark:#4EC9B0"> Promise</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">((</span><span style="color:#953800;--s
+<span class="line"></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setChallengeId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">        await</span><span style="color:#8250DF;--shiki-dark:#DCDCAA"> loadWallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">loginResult</span><span style="color:#
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      })().</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">catch</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">((</span><span style="color:#953800;--shiki-dark:#9CDCFE">e</span><span style="color:#1F2328;--shiki-dar
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">        console</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">log</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-da
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setIsError</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0550AE;--shiki-dark:#569CD6">true</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">);</span></span>
+<span class="line"><span style="color:#8250DF;--shiki-dark:#DCDCAA">        setStatus</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;Wallet created, but failed to load wallet details.&quot;</span><span style="color:#1F2328;--shik
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">      });</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">    });</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  };</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">  const</span><span style="color:#0550AE;--shiki-dark:#4FC1FF"> primaryWallet</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> =</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> wallets</span><span style="color:#1F2328
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#C586C0">  return</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">    &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">main</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">      &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">div</span><span style="color:#0550AE;--shiki-dark:#9CDCFE"> style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-da
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">h1</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">Create a user wallet with email OTP</span><spa
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">Enter the email of the user you want to create 
+<span class="line"></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">div</span><span style="color:#0550AE;--shiki-dark:#9CDCFE"> style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">label</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            Email address:</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">            &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">input</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">              type</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;email&quot;</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">              value</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">email</span><span style="color:#CF222E;--sh
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">              onChange</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">(</span><span style="color:#953800;--shi
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">              style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">{ </span><span style="color:#1F2328;--shiki
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">              placeholder</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#0A3069;--shiki-dark:#CE9178">&quot;you@example.com&quot;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">            /&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">label</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">div</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">div</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">button</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            onClick</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">handleRequestOtp</span><span style="color:#
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">{ </span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            disabled</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            1. Send email OTP</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">button</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">br</span><span style="color:#1F2328;--shiki-dark:#808080"> /&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">button</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            onClick</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">handleVerifyOtp</span><span style="color:#C
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">{ </span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            disabled</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">              !</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">sdkReady</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> ||</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">              !</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">deviceToken</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> ||</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">              !</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">deviceEncryptionKey</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> ||</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">              !</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">otpToken</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> ||</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#D4D4D4">              !!</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">loginResult</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">            }</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            2. Verify email OTP</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">button</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">br</span><span style="color:#1F2328;--shiki-dark:#808080"> /&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">button</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            onClick</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">handleInitializeUser</span><span style="col
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">{ </span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            disabled</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            3. Initialize user (get challenge)</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">button</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">br</span><span style="color:#1F2328;--shiki-dark:#808080"> /&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">button</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            onClick</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">handleExecuteChallenge</span><span style="c
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">{ </span><span style="color:#1F2328;--shiki-d
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">            disabled</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">!</span><span style="color:#1F2328;--shiki
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            4. Create wallet (execute challenge)</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">button</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">div</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">strong</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">Status:</span><span style="color:#1F2328
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">span</span><span style="color:#0550AE;--shiki-dark:#9CDCFE"> style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shi
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">        {</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">primaryWallet</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> &amp;&amp;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4"> (</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">div</span><span style="color:#0550AE;--shiki-dark:#9CDCFE"> style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shik
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">            &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">h2</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">Wallet details</span><span style="color:#1
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">            &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">              &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">strong</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">Address:</span><span style="color:#1
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">            &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">            &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">              &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">strong</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">Blockchain:</span><span style="color
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">            &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">            {</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">usdcBalance</span><span style="color:#CF222E;--shiki-dark:#D4D4D4"> !==</span><span style="color:#0550AE;--shiki-dark:#569CD6"> null</span><span style="color:#CF22
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">              &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">                &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">strong</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">USDC balance:</span><span style="c
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">              &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">p</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            )</span><span style="color:#CF222E;--shiki-dark:#569CD6">}</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">          &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">div</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">        )</span><span style="color:#CF222E;--shiki-dark:#569CD6">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;</span><span style="color:#116329;--shiki-dark:#569CD6">pre</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#9CDCFE">          style</span><span style="color:#CF222E;--shiki-dark:#D4D4D4">=</span><span style="color:#CF222E;--shiki-dark:#569CD6">{</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">{</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            whiteSpace:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;pre-wrap&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            wordBreak:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;break-all&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            lineHeight:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;1.8&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">            marginTop:</span><span style="color:#0A3069;--shiki-dark:#CE9178"> &quot;16px&quot;</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          }</span><span style="color:#CF222E;--shiki-dark:#569CD6">}</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &gt;</span></span>
+<span class="line"><span style="color:#CF222E;--shiki-dark:#569CD6">          {</span><span style="color:#0550AE;--shiki-dark:#4FC1FF">JSON</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">.</span><span style="color:#8250DF;--shiki-dark:#DCDCAA">stringify</span><span style="color:#1F2328;--shi
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            {</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              deviceId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              email</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              deviceToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              deviceEncryptionKey</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              otpToken</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              userToken:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> loginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">?.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">userToken</span><span styl
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              encryptionKey:</span><span style="color:#1F2328;--shiki-dark:#9CDCFE"> loginResult</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">?.</span><span style="color:#1F2328;--shiki-dark:#9CDCFE">encryptionKey</span><s
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              challengeId</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              wallets</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#9CDCFE">              usdcBalance</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">            },</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#569CD6">            null</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#0550AE;--shiki-dark:#B5CEA8">            2</span><span style="color:#1F2328;--shiki-dark:#D4D4D4">,</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">          )</span><span style="color:#CF222E;--shiki-dark:#569CD6">}</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">        &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">pre</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">      &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">div</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#808080">    &lt;/</span><span style="color:#116329;--shiki-dark:#569CD6">main</span><span style="color:#1F2328;--shiki-dark:#808080">&gt;</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">  );</span></span>
+<span class="line"><span style="color:#1F2328;--shiki-dark:#D4D4D4">}</span></span>
+</code></pre></div></div><div data-component-part="code-block-footer" class="px-3 py-1 flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><button data-component-part="code-block-footer-button" class="flex-1 gap-1.5 flex items-center p
+authentication and wallet creation flow. It initializes the Web SDK, sends and
+verifies OTP codes, manages short-lived state during the login process, and
+coordinates the sequence of actions required to create and display the user’s
+wallet.</span><h2 class="flex whitespace-pre-wrap group font-semibold" id="step-4-run-the-app-flow-2"><div class="absolute" tabindex="-1"><a href="#step-4-run-the-app-flow-2" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-100 focus:opacity-100 focus:outline-0 group/link" aria
+<li>Start the dev server:</li>
+</ol><div class="code-block mt-5 mb-8 not-prose rounded-2xl relative group min-w-0 print:print-color-exact text-gray-950 dark:text-gray-50 codeblock-light border border-gray-950/10 dark:border-white/10 dark:twoslash-dark bg-transparent dark:bg-transparent" numberOfLines="1" language="shellscript"><d
+</code></pre></div></div><div class="print:hidden" data-fade-overlay="true" aria-hidden="true" style="--fade-color-light:#ffffff;--fade-color-dark:#0B0C0E"></div></div><ol start="2">
+<li>Open <a href="http://localhost:3000" target="_blank" rel="noreferrer" class="link">http://localhost:3000</a> in your browser to view the app.</li>
+</ol><ol start="3">
+<li>
+<span data-as="p">Complete the email OTP authentication and wallet creation flow:</span>
+<ol>
+<li>
+<span data-as="p">Enter an <strong>email address</strong>: Choose an email address for the user who will
+authenticate. This email address is used only to receive a one-time
+passcode (OTP) during sign-in.</span>
+</li>
+<li>
+<span data-as="p">Click <strong>Send email OTP</strong>: The Web SDK generates a unique <code>deviceId</code>, which
+identifies the user’s browser. Your backend sends the <code>deviceId</code> and email
+address to Circle, which emails an OTP code and returns temporary
+verification tokens (<code>deviceToken</code>, <code>deviceEncryptionKey</code>, <code>otpToken</code>)
+used by the Web SDK to verify the OTP.</span>
+</li>
+<li>
+<span data-as="p">Open your <strong>Mailtrap Sandbox → Inbox</strong> to view the OTP email sent by
+Circle. When using a Mailtrap Email Sandbox, OTP emails are received in
+the Mailtrap UI by default and are not delivered to the user’s inbox,
+unless email forwarding is configured.</span>
+<div class="callout my-4 px-5 py-4 overflow-hidden rounded-2xl flex gap-3 border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-white/10" data-callout-type="info"><div class="mt-0.5 w-4" data-component-part="callout-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="1
+OTP codes directly to users’ email inboxes.</span></div></div>
+</li>
+<li>
+<span data-as="p">Click <strong>Verify email OTP</strong>: Circle opens a hosted OTP verification window.
+The user enters the code they received. The Web SDK verifies the OTP with
+Circle, which then returns a <code>userToken</code> and <code>encryptionKey</code>. Together,
+they enable an authenticated Circle user session.</span>
+</li>
+<li>
+<span data-as="p">Click <strong>Initialize user</strong>: Your backend initializes the user using the
+<code>userToken</code>. If the user hasn’t created a wallet yet, Circle returns a
+<code>challengeId</code> to create one. If the user is already initialized, the app
+loads the existing wallet instead.</span>
+</li>
+<li>
+<span data-as="p">Click <strong>Create wallet</strong>: The Web SDK executes the challenge using the
+<code>challengeId</code>. The user approves the action, and Circle creates the
+wallet.</span>
+</li>
+</ol>
+</li>
+<li>
+<span data-as="p">Once the flow completes:</span>
+<ul>
+<li>The app displays the wallet’s address, blockchain, and USDC balance.</li>
+<li>You can verify the user was created in the
+<a href="https://console.circle.com/" target="_blank" rel="noreferrer" class="link">Circle Dev Console</a>:<br/>
+<strong>Wallets → User Controlled → Users</strong>.</li>
+</ul>
+</li>
+</ol><h2 class="flex whitespace-pre-wrap group font-semibold" id="step-5-fund-the-wallet-2"><div class="absolute" tabindex="-1"><a href="#step-5-fund-the-wallet-2" class="-ml-10 flex items-center opacity-0 border-0 group-hover:opacity-100 focus:opacity-100 focus:outline-0 group/link" aria-label="Nav
+balance in the app.</span><ol>
+<li>Copy the wallet address (<code>0x...</code>) from the web app UI.</li>
+<li>Visit the official <a href="https://faucet.circle.com/" target="_blank" rel="noreferrer" class="link">Circle Faucet</a>.</li>
+<li>Select <strong>Arc Testnet</strong> as the blockchain network.</li>
+<li>Paste the wallet address in the <strong>Send to</strong> field.</li>
+<li>Click <strong>Send USDC</strong>.</li>
+<li>Return to the app and walk through the flow again.<br/>
+<strong>Note:</strong> Use the same email address to show the same wallet.</li>
+<li>The app will display the updated USDC balance.</li>
+</ol><div class="callout my-4 px-5 py-4 overflow-hidden rounded-2xl flex gap-3 border border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-600/20" data-callout-type="note"><div class="mt-0.5 w-4" data-component-part="callout-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18
+wallet for testing. In production, app developers don’t control user wallets
+or private keys. Instead, users typically fund wallets themselves, but apps
