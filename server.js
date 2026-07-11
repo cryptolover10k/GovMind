@@ -83,7 +83,8 @@ if (contractAddress && providerUrl) {
   async function syncHistoricalProposals() {
     try {
       console.log('Syncing historical proposals from the blockchain...');
-      const events = await contract.queryFilter("ProposalSubmitted");
+      // Only query the last 9000 blocks to avoid the Arc Testnet RPC 10,000 block limit
+      const events = await contract.queryFilter("ProposalSubmitted", -9000);
       for (const event of events) {
         const [id, creator, title, proposalText, evidenceUrl, treasuryAmount, requestedFunding] = event.args;
         const proposalId = id.toString();
