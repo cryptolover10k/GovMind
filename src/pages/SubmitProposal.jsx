@@ -34,7 +34,7 @@ export function SubmitProposal({ walletAddress, walletId, userToken, sdk }) {
       }
 
       setStatusText('Generating smart contract transaction challenge...')
-      const txRes = await fetch('http://localhost:3000/api/circle/transactions/submit-proposal', {
+      const txRes = await fetch('https://govmind-gg3h.onrender.com/api/circle/transactions/submit-proposal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -64,7 +64,7 @@ export function SubmitProposal({ walletAddress, walletId, userToken, sdk }) {
 
       setStatusText('Transaction submitted to Arc Testnet! Waiting for Multi-Agent AI Consensus...')
       
-      const res = await fetch('http://localhost:3000/api/analyze-proposal', {
+      const res = await fetch('https://govmind-gg3h.onrender.com/api/analyze-proposal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

@@ -86,7 +86,7 @@ function App() {
 
   const fetchWalletData = async (token) => {
     try {
-      const res = await fetch('http://localhost:3000/api/circle/wallets', {
+      const res = await fetch('https://govmind-gg3h.onrender.com/api/circle/wallets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userToken: token })
@@ -129,7 +129,7 @@ function App() {
       } else {
         // No wallet found - initiate creation challenge
         console.log("No wallet found, initiating creation challenge...");
-        const createRes = await fetch('http://localhost:3000/api/circle/wallets/create', {
+        const createRes = await fetch('https://govmind-gg3h.onrender.com/api/circle/wallets/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userToken: token })
@@ -203,7 +203,7 @@ function App() {
       if (!deviceId) throw new Error("Device ID not ready. Please wait.");
       
       // Request OTP
-      const res = await fetch('http://localhost:3000/api/circle/users/login', {
+      const res = await fetch('https://govmind-gg3h.onrender.com/api/circle/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, deviceId })

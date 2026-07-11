@@ -1,7 +1,7 @@
 // Fetch all proposals from the backend
 export async function getAllProposals() {
   try {
-    const res = await fetch('http://localhost:3000/api/proposals');
+    const res = await fetch('https://govmind-gg3h.onrender.com/api/proposals');
     if (!res.ok) throw new Error('Failed to fetch proposals');
     return await res.json();
   } catch (error) {
@@ -13,7 +13,7 @@ export async function getAllProposals() {
 // Fetch a single proposal
 export async function getProposal(proposalId) {
   try {
-    const res = await fetch(`http://localhost:3000/api/proposals/${proposalId}`);
+    const res = await fetch(`https://govmind-gg3h.onrender.com/api/proposals/${proposalId}`);
     if (!res.ok) throw new Error('Proposal not found');
     return await res.json();
   } catch (error) {
