@@ -1,4 +1,4 @@
-import { Menu, X, ChevronDown, Send, Copy, LogOut } from 'lucide-react'
+import { Menu, X, ChevronDown, Send, Copy, LogOut, Droplet } from 'lucide-react'
 import { useState } from 'react'
 
 const navItems = [
@@ -112,6 +112,15 @@ export function AppLayout({
                     >
                       <Copy size={14} /> Copy Address
                     </button>
+                    <a
+                      href="https://faucet.circle.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-300 transition hover:bg-cyan-300/10 hover:text-white"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <Droplet size={14} /> USDC Faucet
+                    </a>
                     <div className="my-1 h-px w-full bg-slate-800"></div>
                     <button
                       className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-rose-300 transition hover:bg-rose-500/10 hover:text-rose-200"
