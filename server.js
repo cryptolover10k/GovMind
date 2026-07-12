@@ -109,8 +109,8 @@ if (contractAddress && providerUrl) {
             title,
             proposal_text: proposalText,
             evidence_url: evidenceUrl,
-            treasury_amount: treasuryAmount.toString(),
-            requested_funding: requestedFunding.toString(),
+            treasury_amount: (Number(treasuryAmount) / 1e6).toString(),
+            requested_funding: (Number(requestedFunding) / 1e6).toString(),
             status: 'SUBMITTED',
             timestamp: Date.now(),
             analysis: null
@@ -119,7 +119,7 @@ if (contractAddress && providerUrl) {
           // Re-process to ensure payouts/AI runs if it hasn't been executed
           // We wrap in try-catch so it doesn't block sync
           try {
-            await processProposal(proposalId, creator, title, proposalText, requestedFunding.toString());
+            await processProposal(proposalId, creator, title, proposalText, (Number(requestedFunding) / 1e6).toString());
           } catch (e) {
             console.error(`Historical process error for ${proposalId}:`, e);
           }
@@ -151,15 +151,15 @@ if (contractAddress && providerUrl) {
       title,
       proposal_text: proposalText,
       evidence_url: evidenceUrl,
-      treasury_amount: treasuryAmount.toString(),
-      requested_funding: requestedFunding.toString(),
+      treasury_amount: (Number(treasuryAmount) / 1e6).toString(),
+      requested_funding: (Number(requestedFunding) / 1e6).toString(),
       status: 'SUBMITTED',
       timestamp: Date.now(),
       analysis: null
     });
 
     try {
-      await processProposal(proposalId, creator, title, proposalText, requestedFunding.toString());
+      await processProposal(proposalId, creator, title, proposalText, (Number(requestedFunding) / 1e6).toString());
     } catch (err) {
       console.error(`Error processing proposal ${proposalId}:`, err);
     }
@@ -380,7 +380,7 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
         description || "",
         "", // evidenceUrl
         "0", // treasuryAmount
-        String(requestedFunding || 0)
+        String(Math.floor(parseFloat(requestedFunding || 0) * 1e6))
       ],
       fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
       idempotencyKey: crypto.randomUUID(),
