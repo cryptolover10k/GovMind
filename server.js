@@ -382,7 +382,14 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
         "0", // treasuryAmount
         String(Math.floor(parseFloat(requestedFunding || 0) * 1e6))
       ],
-      fee: { type: 'level', config: { feeLevel: 'LOW' } },
+      fee: { 
+        type: 'exact', 
+        config: { 
+          maxFeePerGas: '50000000000',
+          maxPriorityFeePerGas: '2000000000',
+          gasLimit: '500000'
+        } 
+      },
       idempotencyKey: crypto.randomUUID(),
     });
 
