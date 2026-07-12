@@ -312,6 +312,7 @@ function App() {
     setWalletError('')
     localStorage.removeItem('circle_user_token')
     localStorage.removeItem('circle_encryption_key')
+    window.location.reload()
   }
 
   return (
