@@ -424,7 +424,7 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
       payload.tokenId = tokenId;
     }
 
-    const response = await userClient.createUserTransactionTransferChallenge(payload);
+    const response = await userClient.createTransaction(payload);
     res.json({ challengeId: response.data.challengeId });
   } catch (err) {
     console.error("Transfer Challenge Error:", err?.response?.data || err.message);
