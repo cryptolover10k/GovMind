@@ -369,7 +369,7 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
     const { userToken, walletId, title, description, requestedFunding, walletAddress } = req.body;
     
     // 1. Create a Signature Challenge to show the Circle UI popup (bypassing the Gas bug)
-    const response = await userClient.createUserTransactionSignatureChallenge({
+    const response = await userClient.signMessage({
       userToken,
       walletId,
       message: "Please sign this transaction to approve your GovMind proposal and authorize the required gas fee.",
