@@ -45,9 +45,9 @@ OPENAI_API_KEY="your_openai_key"
 ANTHROPIC_API_KEY="your_anthropic_key"
 
 # Blockchain Configuration
-VITE_CONTRACT_ADDRESS="0xC9a5B5A58894C2AB97F568FFaAe5e96085Ae6152"
+VITE_CONTRACT_ADDRESS="0x0F390DAd222775B52592D68464813D64211b39D8"
 VITE_NETWORK_RPC_URL="https://rpc.testnet.arc.network"
-PRIVATE_KEY="your_deployer_private_key"
+DEPLOYER_PRIVATE_KEY="your_deployer_private_key"
 ```
 
 ### 3. Run the Application
