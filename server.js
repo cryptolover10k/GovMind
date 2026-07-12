@@ -176,7 +176,8 @@ async function getOpenAIPrompt(title, text) {
       { role: "user", content: `Title: ${title}\nText: ${text}` }
     ]
   });
-  return completion.choices[0].message.content.trim().toUpperCase();
+  const content = completion.choices?.[0]?.message?.content;
+  return content ? content.trim().toUpperCase() : "REJECT";
 }
 
 async function getAnthropicPrompt(title, text) {
@@ -188,7 +189,8 @@ async function getAnthropicPrompt(title, text) {
       { role: "user", content: `Title: ${title}\nText: ${text}` }
     ]
   });
-  return message.content[0].text.trim().toUpperCase();
+  const text = message.content?.[0]?.text;
+  return text ? text.trim().toUpperCase() : "REJECT";
 }
 
 async function processProposal(id, creator, title, text, amount) {
