@@ -420,8 +420,9 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
       }
     } catch(e) {}
 
+    // Fallback to the global Arc Testnet Native USDC token ID if the balances indexer is lagging
     if (!tokenId) {
-      return res.status(400).json({ error: 'Could not find a valid USDC Token ID in your wallet to transfer. Please ensure you have funds.' });
+      tokenId = '15dc2b5d-0994-58b0-bf8c-3a0501148ee8';
     }
 
     const payload = {
