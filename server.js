@@ -414,11 +414,15 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
         }
       });
       const balData = await balRes.json();
-      const usdcToken = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC' && !t.token.isNative);
+      const usdcToken = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC');
       if (usdcToken) {
         tokenId = usdcToken.token.id;
       }
     } catch(e) {}
+
+    if (!tokenId) {
+      return res.status(400).json({ error: 'Could not find a valid USDC Token ID in your wallet to transfer. Please ensure you have funds.' });
+    }
 
     const payload = {
       userToken,
@@ -426,11 +430,9 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
       destinationAddress,
       amounts: [amount.toString()],
       fee: { type: 'level', config: { feeLevel: 'LOW' } },
+      tokenId: tokenId,
       idempotencyKey: crypto.randomUUID(),
     };
-    if (tokenId) {
-      payload.tokenId = tokenId;
-    }
 
     const response = await userClient.createTransaction(payload);
     res.json({ challengeId: response.data.challengeId });
