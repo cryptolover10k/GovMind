@@ -393,6 +393,45 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
   }
 });
 
+app.post('/api/circle/transactions/transfer', async (req, res) => {
+  try {
+    const { userToken, walletId, destinationAddress, amount } = req.body;
+    
+    let tokenId = undefined;
+    try {
+      const balRes = await fetch(`https://api.circle.com/v1/w3s/wallets/${walletId}/balances`, {
+        headers: { 
+          'Authorization': `Bearer ${process.env.CIRCLE_API_KEY}`,
+          'X-User-Token': userToken
+        }
+      });
+      const balData = await balRes.json();
+      const usdcToken = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC');
+      if (usdcToken) {
+        tokenId = usdcToken.token.id;
+      }
+    } catch(e) {}
+
+    const payload = {
+      userToken,
+      walletId,
+      destinationAddress,
+      amounts: [amount.toString()],
+      fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
+      idempotencyKey: crypto.randomUUID(),
+    };
+    if (tokenId) {
+      payload.tokenId = tokenId;
+    }
+
+    const response = await userClient.createUserTransactionTransferChallenge(payload);
+    res.json({ challengeId: response.data.challengeId });
+  } catch (err) {
+    console.error("Transfer Challenge Error:", err?.response?.data || err.message);
+    res.status(500).json({ error: err?.response?.data?.message || err?.response?.data || err.message });
+  }
+});
+
 app.post('/api/circle/users/login', async (req, res) => {
   try {
     const { email, deviceId } = req.body;

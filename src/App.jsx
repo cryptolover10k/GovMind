@@ -264,22 +264,38 @@ function App() {
     setIsSending(true)
     setSendStatus('Initiating transfer...')
     try {
-      // Simulate backend delay for transaction creation
-      await new Promise(r => setTimeout(r, 1500))
+      if (!walletId || !userToken) throw new Error("Wallet not fully connected.");
       
+      const res = await fetch('https://govmind-gg3h.onrender.com/api/circle/transactions/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userToken,
+          walletId,
+          destinationAddress: sendRecipient,
+          amount: sendAmount
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to initiate transfer");
+
       setSendStatus('Please confirm the transfer challenge in the popup...')
       
-      // Simulate user signing the transaction challenge
-      await new Promise(r => setTimeout(r, 2000))
+      await new Promise((resolve, reject) => {
+        sdkRef.current.execute(data.challengeId, (error, result) => {
+          if (error) reject(new Error(error.message || 'Transaction was cancelled or failed'));
+          else resolve(result);
+        });
+      });
       
       setSendStatus('Transfer successful!')
       
-      // Close modal after success
       setTimeout(() => {
         setIsSendModalOpen(false)
         setSendRecipient('')
         setSendAmount('')
         setSendStatus('')
+        fetchWalletData(userToken)
       }, 2000)
     } catch (err) {
       setSendStatus('Transfer failed: ' + err.message)
