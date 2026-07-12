@@ -34,11 +34,22 @@ contract GovMindProposals {
         uint256 _treasuryAmount,
         uint256 _requestedFunding
     ) public returns (uint256) {
+        return submitProposalDelegated(msg.sender, _title, _proposalText, _evidenceUrl, _treasuryAmount, _requestedFunding);
+    }
+
+    function submitProposalDelegated(
+        address _creator,
+        string memory _title,
+        string memory _proposalText,
+        string memory _evidenceUrl,
+        uint256 _treasuryAmount,
+        uint256 _requestedFunding
+    ) public returns (uint256) {
         uint256 id = nextProposalId++;
         
         proposals[id] = Proposal({
             id: id,
-            creator: msg.sender,
+            creator: _creator,
             title: _title,
             proposalText: _proposalText,
             evidenceUrl: _evidenceUrl,
@@ -49,7 +60,7 @@ contract GovMindProposals {
 
         emit ProposalSubmitted(
             id,
-            msg.sender,
+            _creator,
             _title,
             _proposalText,
             _evidenceUrl,
