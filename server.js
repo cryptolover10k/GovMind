@@ -189,8 +189,8 @@ async function getAnthropicPrompt(title, text) {
       { role: "user", content: `Title: ${title}\nText: ${text}` }
     ]
   });
-  const text = message.content?.[0]?.text;
-  return text ? text.trim().toUpperCase() : "REJECT";
+  const responseText = message.content?.[0]?.text;
+  return responseText ? responseText.trim().toUpperCase() : "REJECT";
 }
 
 async function processProposal(id, creator, title, text, amount) {
