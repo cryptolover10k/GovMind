@@ -71,13 +71,19 @@ const abi = [
 const contractAddress = process.env.VITE_CONTRACT_ADDRESS;
 const providerUrl = process.env.VITE_NETWORK_RPC_URL;
 
-// Setup Ethers Provider & Wallet for Developer Backend Bypass
+// Setup Ethers Provider & Wallet for Developer Backend Bypass (Lazy Initialization)
 const arcProvider = new ethers.JsonRpcProvider(process.env.VITE_NETWORK_RPC_URL || 'https://rpc.testnet.arc.network');
-const devWallet = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, arcProvider);
 const GovMindAbi = [
   "function submitProposalDelegated(address _creator, string memory _title, string memory _proposalText, string memory _evidenceUrl, uint256 _treasuryAmount, uint256 _requestedFunding) public returns (uint256)"
 ];
-const govMindContract = new ethers.Contract(process.env.VITE_CONTRACT_ADDRESS, GovMindAbi, devWallet);
+
+function getGovMindContract() {
+  if (!process.env.DEPLOYER_PRIVATE_KEY) {
+    throw new Error("DEPLOYER_PRIVATE_KEY is missing from environment variables");
+  }
+  const devWallet = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, arcProvider);
+  return new ethers.Contract(process.env.VITE_CONTRACT_ADDRESS, GovMindAbi, devWallet);
+}
 
 if (contractAddress && providerUrl) {
   const provider = new ethers.JsonRpcProvider(providerUrl);
@@ -374,7 +380,7 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
     // The smart contract uses 'submitProposalDelegated' to securely map the 'creator' to the user's wallet address.
     const requestedFundingFormatted = String(Math.floor(parseFloat(requestedFunding || 0) * 1e6));
     
-    govMindContract.submitProposalDelegated(
+    getGovMindContract().submitProposalDelegated(
       walletAddress,
       title || "",
       description || "",
