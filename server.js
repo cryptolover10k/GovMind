@@ -406,7 +406,7 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
         }
       });
       const balData = await balRes.json();
-      const usdcToken = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC');
+      const usdcToken = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC' && !t.token.isNative);
       if (usdcToken) {
         tokenId = usdcToken.token.id;
       }
