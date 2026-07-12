@@ -366,7 +366,7 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
     const response = await userClient.createUserTransactionSignatureChallenge({
       userToken,
       walletId,
-      message: "Please sign this message to approve your GovMind proposal without paying gas. This is a secure gasless Meta-Transaction.",
+      message: "Please sign this transaction to approve your GovMind proposal and authorize the required gas fee.",
       idempotencyKey: crypto.randomUUID(),
     });
 
