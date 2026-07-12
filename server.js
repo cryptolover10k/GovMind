@@ -382,7 +382,7 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
         "0", // treasuryAmount
         String(Math.floor(parseFloat(requestedFunding || 0) * 1e6))
       ],
-      fee: { type: 'gas' },
+      fee: { type: 'level', config: { feeLevel: 'LOW' } },
       idempotencyKey: crypto.randomUUID(),
     });
 
@@ -417,7 +417,7 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
       walletId,
       destinationAddress,
       amounts: [amount.toString()],
-      fee: { type: 'gas' },
+      fee: { type: 'level', config: { feeLevel: 'LOW' } },
       idempotencyKey: crypto.randomUUID(),
     };
     if (tokenId) {
