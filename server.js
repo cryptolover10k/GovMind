@@ -425,13 +425,38 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
   try {
     const { userToken, walletId, destinationAddress, amount } = req.body;
     
+    let tokenId = undefined;
+    try {
+      const balRes = await fetch(`https://api.circle.com/v1/w3s/wallets/${walletId}/balances`, {
+        headers: { 
+          'Authorization': `Bearer ${process.env.CIRCLE_API_KEY}`,
+          'X-User-Token': userToken
+        }
+      });
+      const balData = await balRes.json();
+      console.log("RAW BALANCES DATA:", JSON.stringify(balData, null, 2));
+      
+      // Try to find the token ID by checking isNative instead of symbol
+      const nativeToken = balData?.data?.tokenBalances?.find(t => t.token.isNative);
+      if (nativeToken) {
+        tokenId = nativeToken.token.id;
+        console.log("FOUND NATIVE TOKEN ID:", tokenId);
+      }
+    } catch(e) {
+      console.error("Error fetching balances:", e);
+    }
+
+    if (!tokenId) {
+      return res.status(400).json({ error: 'Could not find a valid Token ID in your wallet to transfer. Please ensure you have funds.' });
+    }
+
     const payload = {
       userToken,
       walletId,
       destinationAddress,
       amounts: [amount.toString()],
       fee: { type: 'level', config: { feeLevel: 'LOW' } },
-      tokenId: '15dc2b5d-0994-58b0-bf8c-3a0501148ee8',
+      tokenId: tokenId,
       idempotencyKey: crypto.randomUUID(),
     };
 
