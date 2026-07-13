@@ -334,7 +334,7 @@ app.post('/api/circle/wallets/create', async (req, res) => {
   try {
     const { userToken, blockchains } = req.body;
     
-    const response = await fetch('https://api.circle.com/v1/w3s/user/initialize', {
+    let response = await fetch('https://api.circle.com/v1/w3s/user/initialize', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -348,16 +348,41 @@ app.post('/api/circle/wallets/create', async (req, res) => {
       }),
     });
     
-    const data = await response.json();
-    
     if (!response.ok) {
-      if (data.code === 155106) {
-        // User already initialized
-        return res.json({ challengeId: null });
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch(e) {
+        return res.status(response.status).json({ error: "Failed to parse API response" });
       }
-      return res.status(response.status).json(data);
+      
+      // If the user is already initialized (code 155106), they just need a new wallet on this blockchain
+      if (errorData.code === 155106 || (errorData.message && errorData.message.includes('already initialized'))) {
+        console.log("User already initialized, adding a new wallet instead...");
+        response = await fetch('https://api.circle.com/v1/w3s/user/wallets', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.CIRCLE_API_KEY}`,
+            'X-User-Token': userToken,
+          },
+          body: JSON.stringify({
+            idempotencyKey: crypto.randomUUID(),
+            accountType: 'SCA',
+            blockchains: blockchains || ['ARC-TESTNET'],
+          }),
+        });
+        
+        if (!response.ok) {
+          const wErrorData = await response.json();
+          return res.status(response.status).json(wErrorData);
+        }
+      } else {
+        return res.status(response.status).json(errorData);
+      }
     }
     
+    const data = await response.json();
     return res.json({ challengeId: data.data?.challengeId });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -411,6 +436,7 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
       destinationAddress,
       amounts: [amount.toString()],
       fee: { type: 'level', config: { feeLevel: 'LOW' } },
+      tokenId: '15dc2b5d-0994-58b0-bf8c-3a0501148ee8',
       idempotencyKey: crypto.randomUUID(),
     };
 
