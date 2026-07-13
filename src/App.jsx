@@ -97,7 +97,7 @@ function App() {
       
       const wallets = data.data?.wallets || [];
       // Explicitly find the wallet on ARC-TESTNET to prevent blockchain mismatches
-      const arcWallet = wallets.find(w => w.blockchain === 'ARC-TESTNET') || wallets[0];
+      const arcWallet = wallets.find(w => w.blockchain === 'ARC-TESTNET');
       
       if (arcWallet) {
         const address = arcWallet.address;
@@ -130,12 +130,12 @@ function App() {
           console.error("Failed to fetch Arc Network balance:", rpcErr);
         }
       } else {
-        // No wallet found - initiate creation challenge
-        console.log("No wallet found, initiating creation challenge...");
+        // No ARC-TESTNET wallet found - initiate creation challenge
+        console.log("No ARC-TESTNET wallet found, initiating creation challenge...");
         const createRes = await fetch('https://govmind-gg3h.onrender.com/api/circle/wallets/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userToken: token })
+          body: JSON.stringify({ userToken: token, blockchains: ['ARC-TESTNET'] })
         });
         const createData = await createRes.json();
         

@@ -443,24 +443,6 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
 app.post('/api/circle/transactions/transfer', async (req, res) => {
   try {
     const { userToken, walletId, destinationAddress, amount } = req.body;
-    
-    // Fetch the wallet balances to get the dynamically generated User Token ID for ARC-TESTNET USDC
-    const balRes = await fetch(`https://api.circle.com/v1/w3s/wallets/${walletId}/balances`, {
-      headers: { 
-        'Authorization': `Bearer ${process.env.CIRCLE_API_KEY}`,
-        'X-User-Token': userToken
-      }
-    });
-    const balData = await balRes.json();
-    console.log("Transfer - RAW BALANCES DATA:", JSON.stringify(balData, null, 2));
-
-    // Circle API throws a 'mismatch' if we use the Native Gas Token ID. We MUST explicitly find the ERC20 USDC.
-    const token = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC' && t.token.isNative === false);
-    const tokenId = token?.token?.id;
-
-    if (!tokenId) {
-      return res.status(400).json({ error: 'Could not find a valid ERC20 Token ID in your wallet to transfer. Please ensure you have requested funds from the Arc Faucet first!' });
-    }
 
     const payload = {
       userToken,
@@ -468,15 +450,33 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
       destinationAddress,
       amounts: [amount.toString()],
       fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
-      tokenId: tokenId,
+      blockchain: 'ARC-TESTNET',
       idempotencyKey: crypto.randomUUID(),
     };
 
-    const response = await userClient.createTransaction(payload);
-    res.json({ challengeId: response.data.challengeId });
-  } catch (err) {
-    console.error("Transfer Challenge Error:", err?.response?.data || err.message);
-    res.status(500).json({ error: err?.response?.data?.message || err?.response?.data || err.message });
+    console.log("Transfer - Final Payload:", JSON.stringify(payload, null, 2));
+
+    const response = await fetch('https://api.circle.com/v1/w3s/user/transactions/transfer', {
+      method: 'POST',
+      headers: { 
+        'Authorization': `Bearer ${process.env.CIRCLE_API_KEY}`,
+        'X-User-Token': userToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    console.log("Transfer - Circle API Response:", JSON.stringify(data, null, 2));
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create transfer challenge');
+    }
+
+    res.json({ challengeId: data.data?.challengeId });
+  } catch (error) {
+    console.error('Transfer error:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 });
 
