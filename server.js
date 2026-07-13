@@ -425,13 +425,17 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
   try {
     const { userToken, walletId, destinationAddress, amount } = req.body;
     
+    // Since the Circle balances indexer is lagging and returns empty token balances for new wallets,
+    // we must hardcode the universal Arc Testnet Native USDC Token ID.
+    const tokenId = '15dc2b5d-0994-58b0-bf8c-3a0501148ee8';
+
     const payload = {
       userToken,
       walletId,
       destinationAddress,
       amounts: [amount.toString()],
       fee: { type: 'level', config: { feeLevel: 'LOW' } },
-      blockchain: 'ARC-TESTNET',
+      tokenId: tokenId,
       idempotencyKey: crypto.randomUUID(),
     };
 
