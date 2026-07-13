@@ -409,7 +409,7 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
         "0",
         requestedFundingFormatted
       ],
-      fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
+      feeLevel: 'MEDIUM',
       idempotencyKey: crypto.randomUUID(),
     };
 
@@ -449,7 +449,7 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
       walletId,
       destinationAddress,
       amounts: [amount.toString()],
-      fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
+      feeLevel: 'MEDIUM',
       blockchain: 'ARC-TESTNET',
       idempotencyKey: crypto.randomUUID(),
     };
