@@ -425,9 +425,23 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
   try {
     const { userToken, walletId, destinationAddress, amount } = req.body;
     
-    // Since the Circle balances indexer is lagging and returns empty token balances for new wallets,
-    // we must hardcode the universal Arc Testnet Native USDC Token ID.
-    const tokenId = '15dc2b5d-0994-58b0-bf8c-3a0501148ee8';
+    // Fetch the wallet balances to get the dynamically generated User Token ID for ARC-TESTNET USDC
+    const balRes = await fetch(`https://api.circle.com/v1/w3s/wallets/${walletId}/balances`, {
+      headers: { 
+        'Authorization': `Bearer ${process.env.CIRCLE_API_KEY}`,
+        'X-User-Token': userToken
+      }
+    });
+    const balData = await balRes.json();
+    console.log("Transfer - RAW BALANCES DATA:", JSON.stringify(balData, null, 2));
+
+    // Try to find the token ID by checking the token symbol
+    const token = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC');
+    const tokenId = token?.token?.id;
+
+    if (!tokenId) {
+      return res.status(400).json({ error: 'Could not find a valid Token ID in your wallet to transfer. Please ensure you have requested funds from the Arc Faucet first!' });
+    }
 
     const payload = {
       userToken,
