@@ -96,9 +96,12 @@ function App() {
       if (!res.ok) throw new Error(data.error || 'Failed to fetch wallet');
       
       const wallets = data.data?.wallets || [];
-      if (wallets.length > 0) {
-        const address = wallets[0].address;
-        const id = wallets[0].id;
+      // Explicitly find the wallet on ARC-TESTNET to prevent blockchain mismatches
+      const arcWallet = wallets.find(w => w.blockchain === 'ARC-TESTNET') || wallets[0];
+      
+      if (arcWallet) {
+        const address = arcWallet.address;
+        const id = arcWallet.id;
         setWalletAddress(address);
         setWalletId(id);
         
