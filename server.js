@@ -409,18 +409,37 @@ app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
         "0",
         requestedFundingFormatted
       ],
-      fee: { type: 'level', config: { feeLevel: 'LOW' } },
+      fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
       idempotencyKey: crypto.randomUUID(),
     };
 
-    const response = await userClient.createUserTransactionContractExecutionChallenge(payload);
-    res.json({ challengeId: response.data.challengeId });
-  } catch (err) {
-    console.error("Contract Execution Challenge Error:", err?.response?.data || err.message);
-    res.status(500).json({ error: err?.response?.data?.message || err?.response?.data || err.message });
+    console.log("Submit Proposal - Final Payload:", JSON.stringify(payload, null, 2));
+
+    const response = await fetch('https://api.circle.com/v1/w3s/user/transactions/contractExecution', {
+      method: 'POST',
+      headers: { 
+        'Authorization': `Bearer ${process.env.CIRCLE_API_KEY}`,
+        'X-User-Token': userToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    console.log("Submit Proposal - Circle API Response:", JSON.stringify(data, null, 2));
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to create contract execution challenge');
+    }
+
+    res.json({ challengeId: data.data?.challengeId });
+  } catch (error) {
+    console.error('Submit proposal error:', error);
+    res.status(500).json({ error: error.message || 'Internal server error' });
   }
 });
 
+// Transfer tokens (Used to quickly deploy an initialized wallet)
 app.post('/api/circle/transactions/transfer', async (req, res) => {
   try {
     const { userToken, walletId, destinationAddress, amount } = req.body;
@@ -435,12 +454,12 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
     const balData = await balRes.json();
     console.log("Transfer - RAW BALANCES DATA:", JSON.stringify(balData, null, 2));
 
-    // Try to find the token ID by checking the token symbol
-    const token = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC');
+    // Circle API throws a 'mismatch' if we use the Native Gas Token ID. We MUST explicitly find the ERC20 USDC.
+    const token = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC' && t.token.isNative === false);
     const tokenId = token?.token?.id;
 
     if (!tokenId) {
-      return res.status(400).json({ error: 'Could not find a valid Token ID in your wallet to transfer. Please ensure you have requested funds from the Arc Faucet first!' });
+      return res.status(400).json({ error: 'Could not find a valid ERC20 Token ID in your wallet to transfer. Please ensure you have requested funds from the Arc Faucet first!' });
     }
 
     const payload = {
@@ -448,7 +467,7 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
       walletId,
       destinationAddress,
       amounts: [amount.toString()],
-      fee: { type: 'level', config: { feeLevel: 'LOW' } },
+      fee: { type: 'level', config: { feeLevel: 'MEDIUM' } },
       tokenId: tokenId,
       idempotencyKey: crypto.randomUUID(),
     };
