@@ -414,15 +414,20 @@ app.post('/api/circle/transactions/transfer', async (req, res) => {
         }
       });
       const balData = await balRes.json();
-      const usdcToken = balData?.data?.tokenBalances?.find(t => t.token.symbol === 'USDC');
-      if (usdcToken) {
-        tokenId = usdcToken.token.id;
+      console.log("RAW BALANCES DATA:", JSON.stringify(balData, null, 2));
+      
+      // Try to find the token ID by checking isNative instead of symbol
+      const nativeToken = balData?.data?.tokenBalances?.find(t => t.token.isNative);
+      if (nativeToken) {
+        tokenId = nativeToken.token.id;
+        console.log("FOUND NATIVE TOKEN ID:", tokenId);
       }
-    } catch(e) {}
+    } catch(e) {
+      console.error("Error fetching balances:", e);
+    }
 
-    // Fallback to the global Arc Testnet Native USDC token ID if the balances indexer is lagging
     if (!tokenId) {
-      tokenId = '15dc2b5d-0994-58b0-bf8c-3a0501148ee8';
+      return res.status(400).json({ error: 'Could not find a valid Token ID in your wallet to transfer. Please ensure you have funds.' });
     }
 
     const payload = {
