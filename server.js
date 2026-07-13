@@ -391,34 +391,29 @@ app.post('/api/circle/wallets/create', async (req, res) => {
 
 app.post('/api/circle/transactions/submit-proposal', async (req, res) => {
   try {
-    const { userToken, walletId, title, description, requestedFunding, walletAddress } = req.body;
+    const { userToken, walletId, title, description, requestedFunding } = req.body;
     
-    // 1. Create a Signature Challenge to show the Circle UI popup (bypassing the Gas bug)
-    const response = await userClient.signMessage({
-      userToken,
-      walletId,
-      message: "Please sign this transaction to approve your GovMind proposal and authorize the required gas fee.",
-      idempotencyKey: crypto.randomUUID(),
-    });
-
-    // 2. Execute the smart contract silently in the background using the Developer Wallet
-    // The smart contract uses 'submitProposalDelegated' to securely map the 'creator' to the user's wallet address.
+    // We want the user's wallet to execute the contract itself!
+    const contractAddress = process.env.VITE_CONTRACT_ADDRESS;
     const requestedFundingFormatted = String(Math.floor(parseFloat(requestedFunding || 0) * 1e6));
     
-    getGovMindContract().submitProposalDelegated(
-      walletAddress,
-      title || "",
-      description || "",
-      "", // evidenceUrl
-      0, // treasuryAmount
-      requestedFundingFormatted
-    ).then(tx => {
-      console.log("Delegated Tx Submitted:", tx.hash);
-    }).catch(err => {
-      console.error("Delegated Tx Error:", err.message);
-    });
+    const payload = {
+      userToken,
+      walletId,
+      contractAddress,
+      abiFunctionSignature: "submitProposal(string,string,string,uint256,uint256)",
+      abiParameters: [
+        title || "",
+        description || "",
+        "",
+        "0",
+        requestedFundingFormatted
+      ],
+      fee: { type: 'level', config: { feeLevel: 'LOW' } },
+      idempotencyKey: crypto.randomUUID(),
+    };
 
-    // 3. Return the Signature Challenge ID to the frontend so the user gets the Circle PIN popup!
+    const response = await userClient.createUserTransactionContractExecutionChallenge(payload);
     res.json({ challengeId: response.data.challengeId });
   } catch (err) {
     console.error("Contract Execution Challenge Error:", err?.response?.data || err.message);
