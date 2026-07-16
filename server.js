@@ -523,6 +523,16 @@ app.post('/api/circle/wallets', async (req, res) => {
   }
 });
 
+app.get('/api/ping', (req, res) => res.json({ status: 'awake' }));
+
+// Keep Render backend awake by pinging itself every 14 minutes
+setInterval(() => {
+  const url = process.env.VITE_API_URL || 'https://govmind-gg3h.onrender.com';
+  fetch(`${url}/api/ping`)
+    .then(() => console.log('Keep-alive ping successful'))
+    .catch((err) => console.error('Keep-alive ping failed:', err.message));
+}, 14 * 60 * 1000);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Express Backend running on http://localhost:${PORT}`);
