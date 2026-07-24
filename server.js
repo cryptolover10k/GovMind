@@ -10,7 +10,21 @@ import { ethers } from 'ethers';
 import { initiateUserControlledWalletsClient } from '@circle-fin/user-controlled-wallets';
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map(o => o.trim());
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // No Origin header = server-to-server / curl / self-ping, not a browser — allow.
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
+  methods: ['GET', 'POST'],
+}));
 app.use(express.json());
 
 const DB_FILE = './db.json';
