@@ -221,14 +221,36 @@ async function getAnthropicPrompt(title, text) {
   return responseText ? responseText.trim().toUpperCase() : "REJECT";
 }
 
+const MAX_PAYOUT_USDC = Number(process.env.MAX_PAYOUT_USDC || 20);
+
 async function processProposal(id, creator, title, text, amount) {
   const proposalId = Number(id);
   const proposals = await getProposals();
   const existing = proposals.find(p => p.id === proposalId);
-  
+
   // Prevent re-processing if already executed or rejected
   if (existing && existing.analysis) {
     console.log(`Proposal ${proposalId} has already been analyzed and executed. Skipping re-processing.`);
+    return;
+  }
+
+  const requestedAmount = Number(amount);
+
+  // Hard cap enforced independently of AI consensus, so a manipulated/jailbroken
+  // verdict can never authorize a payout above this ceiling.
+  if (requestedAmount > MAX_PAYOUT_USDC) {
+    console.log(`Proposal ${proposalId} requests ${requestedAmount} USDC, exceeding hard cap of ${MAX_PAYOUT_USDC}. Auto-rejecting without AI review.`);
+    await addOrUpdateProposal({
+      id: proposalId,
+      status: 'REJECTED',
+      analysis: {
+        recommendation: 'REJECT',
+        execution_status: 'REJECTED',
+        target_chain: 'Arc Testnet',
+        summary: `Requested funding (${requestedAmount} USDC) exceeds the hard payout cap of ${MAX_PAYOUT_USDC} USDC.`,
+        risk_score: 100
+      }
+    });
     return;
   }
 
