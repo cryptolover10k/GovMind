@@ -45,13 +45,28 @@ function App() {
   useEffect(() => {
     let cancelled = false;
 
-    const initSdk = () => {
+    const initSdk = async () => {
       try {
         const sdkInstance = new W3SSdk();
 
         // setAppSettings does NOT take a callback in this version.
         sdkInstance.setAppSettings({ appId: import.meta.env.VITE_CIRCLE_APP_ID });
         sdkRef.current = sdkInstance;
+
+        // Fetch Device ID FIRST. Circle's SDK docs warn that calling getDeviceId()
+        // while an authentication call is in flight can interrupt it and cause
+        // "Failed to receive deviceId" — so restoring a saved session (which calls
+        // setAuthentication) must happen only after this resolves.
+        try {
+          const id = await sdkInstance.getDeviceId();
+          if (!cancelled) {
+            setDeviceId(id);
+          }
+        } catch (err) {
+          console.error('Failed to get device ID:', err);
+        }
+
+        if (cancelled) return;
 
         // Restore session if exists
         const savedToken = localStorage.getItem('circle_user_token');
@@ -64,17 +79,6 @@ function App() {
           });
           fetchWalletData(savedToken);
         }
-
-        // Fetch Device ID
-        sdkInstance.getDeviceId()
-          .then(id => {
-            if (!cancelled) {
-              setDeviceId(id);
-            }
-          })
-          .catch(err => {
-            console.error('Failed to get device ID:', err);
-          });
       } catch (err) {
         console.error('Failed to init SDK:', err);
       }
