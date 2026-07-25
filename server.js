@@ -424,22 +424,23 @@ async function processProposal(id, creator, title, text, amount) {
   }
 }
 
+// Arc exposes USDC through two interfaces (per Circle's Arc docs): an 18-decimal
+// "native" view used only for gas, and this 6-decimal ERC-20 view, which is the
+// one to use for all balances, transfers, and approvals.
+const ARC_USDC_TOKEN_ADDRESS = '0x3600000000000000000000000000000000000000';
+
 async function executePayout(destinationAddress, amount) {
   if (!circleClient || !walletId) {
     throw new Error('Circle client not initialized.');
   }
 
-  const balancesResponse = await circleClient.getWalletTokenBalance({ id: walletId });
-  const tokens = balancesResponse.data?.tokenBalances || [];
-  const usdcToken = tokens.find(t => t.token.symbol === 'USDC');
-  
-  if (!usdcToken) {
-    throw new Error('Wallet does not have USDC.');
-  }
-  
+  // Passing tokenAddress directly (matching fund.js's already-working approach)
+  // instead of resolving a tokenId via getWalletTokenBalance() + a symbol match —
+  // that lookup was ambiguous on Arc (native vs ERC-20 both surface as "USDC") and
+  // caused the identical bug in the User-Controlled transfer path historically.
   const transferResponse = await circleClient.createTransaction({
     walletId: walletId,
-    tokenId: usdcToken.token.id,
+    tokenAddress: ARC_USDC_TOKEN_ADDRESS,
     destinationAddress: destinationAddress,
     amounts: [amount],
     fee: { type: 'level', config: { feeLevel: 'HIGH' } },
