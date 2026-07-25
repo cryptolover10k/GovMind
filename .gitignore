@@ -30,6 +30,7 @@ __pycache__/
 recovery_file_*.dat
 wallet.txt
 db.json
+sync_state.json
 compiled.json
 test*.js
 test_proposals.txt

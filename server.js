@@ -28,10 +28,25 @@ app.use(cors({
 app.use(express.json());
 
 const DB_FILE = './db.json';
+const SYNC_STATE_FILE = './sync_state.json';
+const DEPLOYMENT_BLOCK = 51280148;
 
 // Initialize DB if not exists
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify([]));
+}
+
+async function getLastSyncedBlock() {
+  try {
+    const data = await fs.promises.readFile(SYNC_STATE_FILE, 'utf8');
+    return Number(JSON.parse(data).lastSyncedBlock);
+  } catch (err) {
+    return DEPLOYMENT_BLOCK - 1;
+  }
+}
+
+async function setLastSyncedBlock(blockNumber) {
+  await fs.promises.writeFile(SYNC_STATE_FILE, JSON.stringify({ lastSyncedBlock: blockNumber }, null, 2));
 }
 
 async function getProposals() {
@@ -47,15 +62,24 @@ async function saveProposals(proposals) {
   await fs.promises.writeFile(DB_FILE, JSON.stringify(proposals, null, 2));
 }
 
-async function addOrUpdateProposal(proposal) {
-  const proposals = await getProposals();
-  const index = proposals.findIndex(p => p.id === proposal.id);
-  if (index !== -1) {
-    proposals[index] = { ...proposals[index], ...proposal };
-  } else {
-    proposals.push(proposal);
-  }
-  await saveProposals(proposals);
+// Serializes all reads+writes to db.json so two proposals landing close together
+// can't race each other and silently overwrite one another's updates.
+let dbWriteQueue = Promise.resolve();
+
+function addOrUpdateProposal(proposal) {
+  const task = dbWriteQueue.then(async () => {
+    const proposals = await getProposals();
+    const index = proposals.findIndex(p => p.id === proposal.id);
+    if (index !== -1) {
+      proposals[index] = { ...proposals[index], ...proposal };
+    } else {
+      proposals.push(proposal);
+    }
+    await saveProposals(proposals);
+  });
+  // Keep the queue moving even if this write failed, so one bad write doesn't wedge all future ones.
+  dbWriteQueue = task.catch(() => {});
+  return task;
 }
 
 // Initialize AI Clients
@@ -107,22 +131,28 @@ if (contractAddress && providerUrl) {
   
   const processedProposals = new Set();
 
-  // Sync historical proposals on startup
+  // Sync historical proposals on startup, resuming from where the last run left off
   async function syncHistoricalProposals() {
     try {
-      console.log('Syncing historical proposals from the blockchain...');
-      const deploymentBlock = 51280148;
+      const fromBlock = (await getLastSyncedBlock()) + 1;
       const latestBlock = await provider.getBlockNumber();
+
+      if (fromBlock > latestBlock) {
+        console.log('Historical sync already up to date.');
+        return;
+      }
+
+      console.log(`Syncing historical proposals from block ${fromBlock} to ${latestBlock}...`);
       let allEvents = [];
-      
-      for (let i = deploymentBlock; i <= latestBlock; i += 9000) {
+
+      for (let i = fromBlock; i <= latestBlock; i += 9000) {
         const toBlock = Math.min(i + 8999, latestBlock);
         console.log(`Fetching blocks ${i} to ${toBlock}...`);
         const chunk = await contract.queryFilter("ProposalSubmitted", i, toBlock);
         allEvents = allEvents.concat(chunk);
       }
 
-      console.log(`Found ${allEvents.length} historical proposals.`);
+      console.log(`Found ${allEvents.length} new historical proposals.`);
       for (const event of allEvents) {
         const [id, creator, title, proposalText, evidenceUrl, treasuryAmount, requestedFunding] = event.args;
         const proposalId = id.toString();
@@ -153,14 +183,35 @@ if (contractAddress && providerUrl) {
           }
         }
       }
+      await setLastSyncedBlock(latestBlock);
       console.log('Historical sync complete.');
     } catch (err) {
       console.error('Failed to sync historical proposals:', err);
     }
   }
 
-  // Run the sync
-  syncHistoricalProposals();
+  // Picks up proposals that never reached a terminal state — e.g. the server
+  // restarted mid-payout — and retries them from the cached DB record, without
+  // re-scanning the chain (that's what syncHistoricalProposals is for).
+  async function retryIncompleteProposals() {
+    const proposals = await getProposals();
+    const incomplete = proposals.filter(p => p.status === 'SUBMITTED' || p.status === 'PAYOUT_FAILED');
+
+    for (const p of incomplete) {
+      processedProposals.add(String(p.id));
+      console.log(`Retrying incomplete proposal ${p.id} (status: ${p.status})...`);
+      try {
+        await processProposal(p.id, p.creator, p.title, p.proposal_text, p.requestedFunding);
+      } catch (e) {
+        console.error(`Retry failed for proposal ${p.id}:`, e);
+      }
+    }
+  }
+
+  // Run the sync, retry anything left incomplete, then keep retrying periodically
+  // in case a payout failure needs a fresh attempt (e.g. Circle API was briefly down).
+  syncHistoricalProposals().then(() => retryIncompleteProposals());
+  setInterval(retryIncompleteProposals, 5 * 60 * 1000);
 
   contract.on("ProposalSubmitted", async (id, creator, title, proposalText, evidenceUrl, treasuryAmount, requestedFunding) => {
     const proposalId = id.toString();
@@ -238,15 +289,22 @@ async function getAnthropicPrompt(title, text) {
 }
 
 const MAX_PAYOUT_USDC = Number(process.env.MAX_PAYOUT_USDC || 20);
+const MAX_PAYOUT_RETRIES = Number(process.env.MAX_PAYOUT_RETRIES || 5);
 
 async function processProposal(id, creator, title, text, amount) {
   const proposalId = Number(id);
   const proposals = await getProposals();
   const existing = proposals.find(p => p.id === proposalId);
 
-  // Prevent re-processing if already executed or rejected
-  if (existing && existing.analysis) {
-    console.log(`Proposal ${proposalId} has already been analyzed and executed. Skipping re-processing.`);
+  // Only a terminal state should stop retries — PAYOUT_FAILED must stay retryable.
+  if (existing && (existing.status === 'EXECUTED' || existing.status === 'REJECTED')) {
+    console.log(`Proposal ${proposalId} already reached a terminal state (${existing.status}). Skipping.`);
+    return;
+  }
+
+  const payoutAttempts = existing?.payoutAttempts || 0;
+  if (payoutAttempts >= MAX_PAYOUT_RETRIES) {
+    console.log(`Proposal ${proposalId} has failed ${payoutAttempts} payout attempts, exceeding max retries of ${MAX_PAYOUT_RETRIES}. Leaving as PAYOUT_FAILED for manual review.`);
     return;
   }
 
@@ -270,33 +328,57 @@ async function processProposal(id, creator, title, text, amount) {
     return;
   }
 
-  console.log(`Evaluating proposal ${id}...`);
-  
-  const [openaiResult, anthropicResult] = await Promise.all([
-    getOpenAIPrompt(title, text).catch(() => "ERROR"),
-    getAnthropicPrompt(title, text).catch(() => "ERROR")
-  ]);
-
-  console.log(`OpenAI: ${openaiResult} | Anthropic: ${anthropicResult}`);
+  let openaiResult, anthropicResult;
+  if (existing?.analysis?.recommendation === 'APPROVE') {
+    // Payout failed after the AIs already approved — reuse that verdict instead of
+    // spending two more LLM calls just to re-confirm what's already known.
+    ({ openai: openaiResult, anthropic: anthropicResult } = existing.analysis);
+    console.log(`Reusing cached AI consensus for proposal ${proposalId} (payout retry attempt ${payoutAttempts + 1}).`);
+  } else {
+    console.log(`Evaluating proposal ${id}...`);
+    [openaiResult, anthropicResult] = await Promise.all([
+      getOpenAIPrompt(title, text).catch(() => "ERROR"),
+      getAnthropicPrompt(title, text).catch(() => "ERROR")
+    ]);
+    console.log(`OpenAI: ${openaiResult} | Anthropic: ${anthropicResult}`);
+  }
 
   if (openaiResult.includes("APPROVE") && anthropicResult.includes("APPROVE")) {
     console.log("Multi-agent consensus reached: APPROVE. Executing payout...");
-    const txId = await executePayout(creator, amount);
-    
-    await addOrUpdateProposal({
-      id: proposalId,
-      status: 'EXECUTED',
-      analysis: {
-        recommendation: 'APPROVE',
-        execution_status: 'EXECUTED_USDC',
-        target_chain: 'Arc Testnet',
-        arc_tx_hash: txId || 'pending',
-        openai: openaiResult,
-        anthropic: anthropicResult,
-        summary: `Both AI agents approved the proposal for a payout of ${amount} USDC.`,
-        risk_score: 10
-      }
-    });
+    try {
+      const txId = await executePayout(creator, amount);
+      await addOrUpdateProposal({
+        id: proposalId,
+        status: 'EXECUTED',
+        analysis: {
+          recommendation: 'APPROVE',
+          execution_status: 'EXECUTED_USDC',
+          target_chain: 'Arc Testnet',
+          arc_tx_hash: txId || 'pending',
+          openai: openaiResult,
+          anthropic: anthropicResult,
+          summary: `Both AI agents approved the proposal for a payout of ${amount} USDC.`,
+          risk_score: 10
+        }
+      });
+    } catch (payoutErr) {
+      console.error(`Payout execution failed for proposal ${proposalId} (attempt ${payoutAttempts + 1}):`, payoutErr.message);
+      await addOrUpdateProposal({
+        id: proposalId,
+        status: 'PAYOUT_FAILED',
+        payoutAttempts: payoutAttempts + 1,
+        analysis: {
+          recommendation: 'APPROVE',
+          execution_status: 'PAYOUT_FAILED',
+          target_chain: 'Arc Testnet',
+          openai: openaiResult,
+          anthropic: anthropicResult,
+          summary: `Both AI agents approved a payout of ${amount} USDC, but execution failed: ${payoutErr.message}`,
+          risk_score: 10,
+          last_error: payoutErr.message
+        }
+      });
+    }
   } else {
     console.log("Proposal rejected by one or more agents.");
     await addOrUpdateProposal({
