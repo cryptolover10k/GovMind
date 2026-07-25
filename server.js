@@ -385,7 +385,12 @@ async function processProposal(id, creator, title, text, amount) {
         }
       });
     } catch (payoutErr) {
-      console.error(`Payout execution failed for proposal ${proposalId} (attempt ${payoutAttempts + 1}):`, payoutErr.message);
+      // Circle's SDK wraps the raw API response behind an `.error` getter — surface
+      // that full body (which usually names the exact bad field) instead of just
+      // the generic top-level message, so failures are diagnosable from the UI alone.
+      const rawResponseData = payoutErr?.error?.response?.data;
+      const errorDetail = rawResponseData ? JSON.stringify(rawResponseData) : payoutErr.message;
+      console.error(`Payout execution failed for proposal ${proposalId} (attempt ${payoutAttempts + 1}):`, errorDetail);
       await addOrUpdateProposal({
         id: proposalId,
         status: 'PAYOUT_FAILED',
@@ -398,9 +403,9 @@ async function processProposal(id, creator, title, text, amount) {
           anthropic: anthropicVerdict.decision,
           openaiReasoning: openaiVerdict.reasoning,
           anthropicReasoning: anthropicVerdict.reasoning,
-          summary: `Both AI agents approved a payout of ${amount} USDC, but execution failed: ${payoutErr.message}`,
+          summary: `Both AI agents approved a payout of ${amount} USDC, but execution failed: ${errorDetail}`,
           risk_score: 10,
-          last_error: payoutErr.message
+          last_error: errorDetail
         }
       });
     }
