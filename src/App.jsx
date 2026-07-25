@@ -106,7 +106,9 @@ function App() {
         setWalletId(id);
         
         try {
-          // Arc Network uses USDC as its native gas token, so we fetch the native ETH balance
+          // Arc's native balance IS USDC, but eth_getBalance returns it in the 18-decimal
+          // "native view" (per Circle's Arc docs), distinct from the 6-decimal ERC-20 USDC
+          // view at a separate contract address. Divide by 1e18 here, not 1e6.
           const arcRpcUrl = import.meta.env.VITE_NETWORK_RPC_URL || 'https://rpc.testnet.arc.network';
           const rpcRes = await fetch(arcRpcUrl, {
             method: 'POST',

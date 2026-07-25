@@ -7,17 +7,26 @@ export function Dashboard({ onNavigate }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    let cancelled = false
+
     async function loadProposals() {
       const [serviceProposals, serviceStats] = await Promise.all([
         getAllProposals(),
         getNetworkStats(),
       ])
+      if (cancelled) return
       setProposals(serviceProposals)
       setNetworkStats(serviceStats.slice(0, 3))
       setIsLoading(false)
     }
 
     loadProposals()
+    const intervalId = setInterval(loadProposals, 15000)
+
+    return () => {
+      cancelled = true
+      clearInterval(intervalId)
+    }
   }, [])
 
   return (
