@@ -32,3 +32,10 @@ wallet.txt
 db.json
 compiled.json
 test*.js
+test_proposals.txt
+Hackathon_Submission.txt
+
+# Dev-scratch files with no runtime purpose
+fund.js
+extract.cjs
+email_otp_guide.txt
