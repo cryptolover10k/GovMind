@@ -446,6 +446,7 @@ async function executePayout(destinationAddress, amount) {
   const transferResponse = await circleClient.createTransaction({
     walletId: walletId,
     tokenAddress: ARC_USDC_TOKEN_ADDRESS,
+    blockchain: 'ARC-TESTNET',
     destinationAddress: destinationAddress,
     amounts: [amount],
     fee: { type: 'level', config: { feeLevel: 'HIGH' } },
