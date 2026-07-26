@@ -6,11 +6,14 @@ export function ProposalDetails({ proposalId, onNavigate, onSelectProposal }) {
   const [proposals, setProposals] = useState([])
 
   useEffect(() => {
+    let cancelled = false
+
     async function loadProposalDetails() {
       const [serviceProposal, serviceProposals] = await Promise.all([
         getProposal(proposalId),
         getAllProposals(),
       ])
+      if (cancelled) return
 
       const fallbackProposal = serviceProposals[0] ?? null
 
@@ -19,6 +22,12 @@ export function ProposalDetails({ proposalId, onNavigate, onSelectProposal }) {
     }
 
     loadProposalDetails()
+    const intervalId = setInterval(loadProposalDetails, 15000)
+
+    return () => {
+      cancelled = true
+      clearInterval(intervalId)
+    }
   }, [proposalId])
 
   if (!proposal) {
